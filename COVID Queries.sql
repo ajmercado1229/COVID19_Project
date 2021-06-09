@@ -1,3 +1,11 @@
+/*
+
+Covid 19 Data Exploration
+
+*/
+
+----------------------------------------------------------------------------------------------------------------------------
+
 -- 1) Initial look at dataset
 
 SELECT * FROM PortfolioProject.dbo.CovidDeaths
