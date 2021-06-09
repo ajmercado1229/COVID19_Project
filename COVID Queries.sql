@@ -204,6 +204,24 @@ SELECT *,
 	   (RollingPeopleVaccinated/Population)*100
 FROM #PercentPopulationVaccinated
 
+----------------------------------------------------------------------------------------------------------------------------
 
+-- 13) Current Death Percentage by Country
 
+SELECT B.location,
+	   B.date,
+	   B.total_cases,
+	   B.total_deaths,
+	   (B.total_deaths/B.total_cases)*100 AS DeathPercentage
+FROM PortfolioProject.dbo.CovidDeaths AS B
+INNER JOIN(
+	SELECT location,
+			MAX(date) AS MaxDate
+	FROM PortfolioProject.dbo.CovidDeaths
+	GROUP BY location) AS A
+ON A.location = B.location 
+AND B.date = A.MaxDate
+WHERE continent IS NOT NULL
+ORDER BY location
 
+----------------------------------------------------------------------------------------------------------------------------
