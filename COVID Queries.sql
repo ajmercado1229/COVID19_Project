@@ -1,10 +1,14 @@
+-- 1) Initial look at dataset
+
 SELECT * FROM PortfolioProject.dbo.CovidDeaths
 ORDER BY 3,4
 
 --SELECT * FROM PortfolioProject.dbo.CovidVaccinations
 --ORDER BY 3,4
 
--- Select the data that we are going to be using
+----------------------------------------------------------------------------------------------------------------------------
+
+-- 2) Select only the data that will be used
 
 SELECT location,
 	   date,
@@ -15,8 +19,10 @@ SELECT location,
 FROM PortfolioProject.dbo.CovidDeaths
 ORDER BY 1,2
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Looking at Total Cases vs Total Deaths
+-- 3) Total Cases vs Total Deaths
+
 -- Shows the likelihood of dying if you contract COVID-19 in your country.
 -- In this case, it is set to specify the United States.
 
@@ -30,9 +36,12 @@ FROM PortfolioProject.dbo.CovidDeaths
 WHERE location like '%states%'
 ORDER BY 1,2
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Looking at the Total Cases vs Population
+-- 4) Total Cases vs Population
+
 -- Shows what percentage of the population has contracted COVID-19
+-- In this case, it is set to specify the United States.
 
 SELECT location,
 	   date,
@@ -43,8 +52,9 @@ FROM PortfolioProject.dbo.CovidDeaths
 WHERE location like '%states%'
 ORDER BY 1,2
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Looking at the countries with the highest infection rate compared to the population.
+-- 5) Countries with the Highest Infection Rate compared to the Population.
 
 SELECT location,
 	   population,
@@ -52,28 +62,28 @@ SELECT location,
 	   MAX((total_cases/population))*100 AS PopulationPercentage
 FROM PortfolioProject.dbo.CovidDeaths
 GROUP BY location,
-		 population
+	 population
 ORDER BY PopulationPercentage DESC
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Showing Countries with highest Death Count per Population
+-- 6) Countries with Highest Death Count per Population
 
 SELECT location,
 	   MAX(CAST(total_deaths AS INT)) AS TotalDeathCount
 FROM PortfolioProject.dbo.CovidDeaths
 WHERE continent IS NOT NULL
 GROUP BY location,
-		 population
+	 population
 ORDER BY TotalDeathCount DESC
 
--- Initially it is going to read the total_deaths as NVARCHAR and order it weird. 
--- So you need to convert (or cast) it to an integer to be sorted correctly.
--- Also, we had to add the continent not null piece because otherwise it will include in our 
--- data duplicates like Africa and World which are not countries but rather totals.
+-- total_deaths is NVARCHAR so it must be cast as an integer to aggregate it.
+-- The location field includes both countries and continents so the where continent is not null line will 
+-- ensure that only countries are shown and not continent summaries or duplicate data.
 
+----------------------------------------------------------------------------------------------------------------------------
 
-
--- Now let's instead break it down by continent.
+-- 7) Continents with Highest Death Count per Population
 
 SELECT location,
 	   MAX(CAST(total_deaths AS INT)) AS TotalDeathCount
@@ -82,8 +92,9 @@ WHERE continent IS NULL
 GROUP BY location
 ORDER BY TotalDeathCount DESC
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Global Numbers by Date 
+-- 8) Global Numbers by Date 
 
 SELECT date,
 	   SUM(new_cases) AS TotalCases,
@@ -94,7 +105,9 @@ WHERE continent IS NOT NULL
 GROUP BY date
 ORDER BY 1,2
 
--- Global Numbers Total
+----------------------------------------------------------------------------------------------------------------------------
+
+-- 9) Global Numbers Total
 
 SELECT SUM(new_cases) AS TotalCases,
 	   SUM(CAST(new_deaths AS INT)) AS TotalDeaths,
@@ -103,9 +116,9 @@ FROM PortfolioProject.dbo.CovidDeaths
 WHERE continent IS NOT NULL
 ORDER BY 1,2
 
+----------------------------------------------------------------------------------------------------------------------------
 
-
--- Looking at total population vs Vaccination
+-- 10) Total Population vs Vaccination
 
 SELECT DEA.continent,
 	   DEA.location,
@@ -121,8 +134,9 @@ JOIN PortfolioProject.dbo.CovidVaccinations AS VAC
 WHERE DEA.continent IS NOT NULL
 ORDER BY 2,3
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Take the above and turn it into a CTE (common table expression): allows it to be referenced later.
+-- 11) Total Population vs Vaccination CTE (common table expression): allows it to be referenced later.
 
 
 WITH PopVsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
@@ -140,7 +154,6 @@ JOIN PortfolioProject.dbo.CovidVaccinations AS VAC
 	ON DEA.location = VAC.location
 	AND DEA.date = VAC.date
 WHERE DEA.continent IS NOT NULL
---ORDER BY 2,3 -- you cannot have an order by
 )
 
 SELECT *,
@@ -148,11 +161,12 @@ SELECT *,
 FROM PopVsVac
 WHERE Location = 'United States'
 
+----------------------------------------------------------------------------------------------------------------------------
 
--- Example of usinga  Temp Table instead
+-- 12) Total Population vs Vaccination Temp Table
 
+DROP TABLE IF EXISTS #PercentPopulationVaccinated
 
--- DROP Table if exists #PercentPopulationVaccinated THIS DOESN"T WORK IN THIS VERSION OF SQL SERVER
 CREATE TABLE #PercentPopulationVaccinated
 (
 Continent NVARCHAR(255),
@@ -176,7 +190,7 @@ JOIN PortfolioProject.dbo.CovidVaccinations AS VAC
 	ON DEA.location = VAC.location
 	AND DEA.date = VAC.date
 WHERE DEA.continent IS NOT NULL
---ORDER BY 2,3 -- you cannot have an order by
+
 
 SELECT *,
 	   (RollingPeopleVaccinated/Population)*100
