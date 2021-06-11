@@ -67,11 +67,11 @@ ORDER BY 1,2
 SELECT location,
 	   population,
 	   MAX(total_cases) AS HighestInfectionCount,
-	   MAX((total_cases/population))*100 AS PopulationPercentage
+	   MAX((total_cases/population))*100 AS PopulationPercentageInfected
 FROM PortfolioProject.dbo.CovidDeaths
 GROUP BY location,
 	 population
-ORDER BY PopulationPercentage DESC
+ORDER BY PopulationPercentageInfected DESC
 
 ----------------------------------------------------------------------------------------------------------------------------
 
@@ -223,5 +223,30 @@ ON A.location = B.location
 AND B.date = A.MaxDate
 WHERE continent IS NOT NULL
 ORDER BY location
+
+----------------------------------------------------------------------------------------------------------------------------
+
+-- 14) Infection Rates Over Time by Country
+
+SELECT Location, 
+       Population,
+       date, 
+       MAX(total_cases) as HighestInfectionCount,  
+       MAX((total_cases/population))*100 as PercentPopulationInfected
+FROM PortfolioProject.dbo.CovidDeaths
+GROUP BY Location, Population, date
+ORDER BY PercentPopulationInfected DESC
+
+----------------------------------------------------------------------------------------------------------------------------
+
+-- 15) Total Deaths per Continent
+
+SELECT location, 
+       SUM(cast(new_deaths as int)) as TotalDeathCount
+FROM PortfolioProject.dbo.CovidDeaths
+WHERE continent IS NULL 
+AND location NOT IN ('World', 'European Union', 'International')
+GROUP BY location
+ORDER BY TotalDeathCount DESC
 
 ----------------------------------------------------------------------------------------------------------------------------
