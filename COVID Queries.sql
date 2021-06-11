@@ -11,8 +11,8 @@ Covid 19 Data Exploration
 SELECT * FROM PortfolioProject.dbo.CovidDeaths
 ORDER BY 3,4
 
---SELECT * FROM PortfolioProject.dbo.CovidVaccinations
---ORDER BY 3,4
+SELECT * FROM PortfolioProject.dbo.CovidVaccinations
+ORDER BY 3,4
 
 ----------------------------------------------------------------------------------------------------------------------------
 
@@ -248,5 +248,7 @@ WHERE continent IS NULL
 AND location NOT IN ('World', 'European Union', 'International')
 GROUP BY location
 ORDER BY TotalDeathCount DESC
+
+-- The NOT IN code line must be used because otherwise you will have duplicated data.
 
 ----------------------------------------------------------------------------------------------------------------------------
